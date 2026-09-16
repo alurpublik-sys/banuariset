@@ -1,0 +1,17 @@
+"use client";
+
+import {FormEvent,useEffect,useState} from "react";
+import {useRouter} from "next/navigation";
+import {supabase} from "../../../../lib/supabase";
+import "../../admin.css";
+
+function slugify(value:string){return value.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9\s-]/g,"").replace(/\s+/g,"-").replace(/-+/g,"-")}
+
+export default function NewResearcherPage(){
+ const router=useRouter(); const[ready,setReady]=useState(false); const[loading,setLoading]=useState(false); const[error,setError]=useState(""); const[photo,setPhoto]=useState<File|null>(null);
+ const[form,setForm]=useState({name:"",title:"",bio:"",expertise:"",email_public:"",linkedin_url:"",orcid:""});
+ useEffect(()=>{supabase.auth.getSession().then(({data})=>{if(!data.session){router.replace('/admin/login');return}setReady(true)})},[router]);
+ async function submit(e:FormEvent){e.preventDefault();setLoading(true);setError("");try{const slug=slugify(form.name);let photo_url:string|null=null;if(photo){const ext=photo.name.split('.').pop()||'jpg';const path=`${slug}/${Date.now()}.${ext}`;const{error}=await supabase.storage.from('researcher-images').upload(path,photo);if(error)throw error;photo_url=supabase.storage.from('researcher-images').getPublicUrl(path).data.publicUrl}const{error}=await supabase.from('researchers').insert({name:form.name,slug,title:form.title||null,bio:form.bio||null,expertise:form.expertise.split('\n').map(x=>x.trim()).filter(Boolean),email_public:form.email_public||null,linkedin_url:form.linkedin_url||null,orcid:form.orcid||null,photo_url,is_active:true});if(error)throw error;router.push('/admin/researchers')}catch(err:any){setError(err?.message||'Gagal menyimpan peneliti.')}finally{setLoading(false)}}
+ if(!ready)return <main className="admin-loading">Memuat form…</main>;
+ return <main className="admin-form-page"><div className="admin-form-header"><div><span className="admin-kicker">PENELITI</span><h1>Profil peneliti baru</h1><p>Profil ini akan dipakai pada halaman publik dan relasi author publikasi.</p></div><a href="/admin/researchers">← Daftar peneliti</a></div><form className="admin-form" onSubmit={submit}><label>Nama lengkap<input required value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/></label><label>Jabatan / posisi<input value={form.title} onChange={e=>setForm({...form,title:e.target.value})}/></label><label>Bio<textarea rows={7} value={form.bio} onChange={e=>setForm({...form,bio:e.target.value})}/></label><label>Keahlian <small>(satu bidang per baris)</small><textarea rows={5} value={form.expertise} onChange={e=>setForm({...form,expertise:e.target.value})}/></label><div className="admin-form-grid"><label>Email publik<input type="email" value={form.email_public} onChange={e=>setForm({...form,email_public:e.target.value})}/></label><label>ORCID<input value={form.orcid} onChange={e=>setForm({...form,orcid:e.target.value})}/></label></div><label>LinkedIn<input value={form.linkedin_url} onChange={e=>setForm({...form,linkedin_url:e.target.value})}/></label><label>Foto<input type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>setPhoto(e.target.files?.[0]??null)}/></label>{error&&<div className="admin-error">{error}</div>}<div className="admin-form-actions"><a href="/admin/researchers">Batal</a><button disabled={loading}>{loading?'Menyimpan...':'Simpan peneliti'}</button></div></form></main>
+}
