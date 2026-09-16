@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
+const logo = "https://raw.githubusercontent.com/alurpublik-sys/banuariset/main/public/banua-logo.png";
 const slides = [
   { type: "POLICY PAPER", title: "Membaca Sulawesi Tengah dengan riset yang dekat pada persoalan publik.", text: "Banua Research mempertemukan data, pengetahuan lokal, dan analisis kebijakan untuk membantu keputusan yang lebih baik.", image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=2000&q=85" },
   { type: "REGIONAL INSIGHT", title: "Dari lapangan ke meja kebijakan, tanpa kehilangan konteks daerah.", text: "Kami menerjemahkan temuan penelitian menjadi pengetahuan yang relevan bagi pemerintah, akademisi, media, dan masyarakat.", image: "https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=2000&q=85" },
@@ -50,7 +51,7 @@ export default function Home() {
   return <main id="top">
     <header className={`site-header ${compact ? "compact" : ""}`}>
       <div className="top shell">
-        <a className="brand" href="#top"><img src="/banua-logo.png" alt="Banua Research" /><div><strong>BANUA</strong><small>RESEARCH</small></div></a>
+        <a className="brand" href="#top"><img src={logo} alt="Banua Research" /><div><strong>BANUA</strong><small>RESEARCH</small></div></a>
         <div className="quick"><span>Peneliti</span><span>Mitra</span><span>Publikasi</span><span>Kontak</span><span>•</span><span>ID</span><b>⌕</b></div>
         <button className="menu" onClick={() => setMenu(!menu)}>{menu ? "×" : "☰"}</button>
       </div>
@@ -81,6 +82,6 @@ export default function Home() {
 
     <section className="closing"><div className="shell"><Reveal><div className="eyebrow"><i/>BANUA RESEARCH</div><h2>Pengetahuan lokal.<br/>Dampak kebijakan yang lebih luas.</h2><p>Riset, policy paper, policy brief, dan insight yang tumbuh dari konteks Sulawesi Tengah.</p><a className="cta" href="#publikasi">Jelajahi pengetahuan</a></Reveal></div></section>
 
-    <footer><div className="shell footer-grid"><div><div className="brand"><img src="/banua-logo.png" alt="Banua Research"/><div><strong>BANUA</strong><small>RESEARCH</small></div></div><p>Research · Policy · Regional Insight</p></div><div><h4>Jelajahi</h4><a>Publikasi</a><a>Riset</a><a>Data</a><a>Kegiatan</a></div><div><h4>Terhubung</h4><a>Instagram</a><a>LinkedIn</a><a>YouTube</a><a>X</a></div><div><h4>Banua Research</h4><p>Palu, Sulawesi Tengah<br/>Indonesia</p><a>halo@banuaresearch.id</a></div></div><div className="shell footer-bottom"><span>© 2026 Banua Research</span><span>Researching the region. Informing public policy.</span></div></footer>
+    <footer><div className="shell footer-grid"><div><div className="brand"><img src={logo} alt="Banua Research"/><div><strong>BANUA</strong><small>RESEARCH</small></div></div><p>Research · Policy · Regional Insight</p></div><div><h4>Jelajahi</h4><a>Publikasi</a><a>Riset</a><a>Data</a><a>Kegiatan</a></div><div><h4>Terhubung</h4><a>Instagram</a><a>LinkedIn</a><a>YouTube</a><a>X</a></div><div><h4>Banua Research</h4><p>Palu, Sulawesi Tengah<br/>Indonesia</p><a>halo@banuaresearch.id</a></div></div><div className="shell footer-bottom"><span>© 2026 Banua Research</span><span>Researching the region. Informing public policy.</span></div></footer>
   </main>;
 }
