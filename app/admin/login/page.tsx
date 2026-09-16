@@ -40,7 +40,10 @@ export default function AdminLoginPage() {
           {error && <div className="admin-error">{error}</div>}
           <button disabled={loading}>{loading ? "Memeriksa..." : "Masuk"}</button>
         </form>
-        <a className="admin-back" href="/">← Kembali ke website</a>
+        <div className="admin-auth-links">
+          <a className="admin-back" href="/admin/setup">Setup Super Admin pertama</a>
+          <a className="admin-back" href="/">← Kembali ke website</a>
+        </div>
       </section>
     </main>
   );
