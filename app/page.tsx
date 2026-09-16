@@ -13,15 +13,16 @@ const slides = [
 
 type Pub={id:string;title:string;slug:string;publication_type:string;excerpt:string|null;cover_image_url:string|null;featured:boolean};
 type Researcher={id:string;name:string;slug:string;title:string|null;expertise:string[]};
+type EventRow={id:string;title:string;slug:string;category:string|null;excerpt:string|null;event_date:string|null};
 
 export default function Home(){
   const [slide,setSlide]=useState(0); const [menu,setMenu]=useState(false); const [active,setActive]=useState("top");
-  const [latest,setLatest]=useState<Pub[]>([]); const[researchers,setResearchers]=useState<Researcher[]>([]); const[pubCount,setPubCount]=useState(0);
+  const [latest,setLatest]=useState<Pub[]>([]); const[researchers,setResearchers]=useState<Researcher[]>([]); const[events,setEvents]=useState<EventRow[]>([]); const[pubCount,setPubCount]=useState(0);
   useEffect(()=>{
     const timer=setInterval(()=>setSlide(v=>(v+1)%slides.length),6500);
     const obs=new IntersectionObserver(es=>{const v=es.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];if(v?.target?.id)setActive(v.target.id)},{rootMargin:"-155px 0px -55% 0px",threshold:[.1,.4]});
     nav.map(([,id])=>document.getElementById(id)).filter(Boolean).forEach(el=>obs.observe(el!));
-    (async()=>{const [{data:p,count},{data:r}]=await Promise.all([supabase.from('publications').select('id,title,slug,publication_type,excerpt,cover_image_url,featured',{count:'exact'}).eq('status','published').order('publication_date',{ascending:false}).limit(4),supabase.from('researchers').select('id,name,slug,title,expertise').eq('is_active',true).order('name').limit(3)]);setLatest(p??[]);setPubCount(count??0);setResearchers(r??[])})();
+    (async()=>{const [{data:p,count},{data:r},{data:e}]=await Promise.all([supabase.from('publications').select('id,title,slug,publication_type,excerpt,cover_image_url,featured',{count:'exact'}).eq('status','published').order('publication_date',{ascending:false}).limit(4),supabase.from('researchers').select('id,name,slug,title,expertise').eq('is_active',true).order('name').limit(3),supabase.from('events').select('id,title,slug,category,excerpt,event_date').eq('status','published').order('event_date',{ascending:false}).limit(3)]);setLatest(p??[]);setPubCount(count??0);setResearchers(r??[]);setEvents(e??[])})();
     return()=>{clearInterval(timer);obs.disconnect()}
   },[]);
   const s=slides[slide];
@@ -43,12 +44,12 @@ export default function Home(){
 
     <section id="data" className="section"><div className="shell"><div className="title"><h2>Sulawesi Tengah dalam Data</h2><i/></div><div className="stats">{[["13","Kabupaten/Kota"],["6","Fokus Riset"],[String(pubCount),"Publikasi Terbit"],["1","Regional Knowledge Hub"]].map((x,i)=><a href={i===2?"/publikasi":"#riset"} className="stat" key={i}><strong>{x[0]}</strong><span>{x[1]}</span></a>)}</div></div></section>
 
-    <section id="kegiatan" className="section dark"><div className="shell"><div className="title"><h2>Kegiatan & Banua Talks</h2><i/></div>{cards([["DISKUSI PUBLIK","Ruang diskusi berbasis riset","Menghubungkan peneliti, pemerintah, komunitas, dan media."],["FGD","Pendalaman persoalan daerah","Mempertemukan data, pengalaman, dan perspektif pemangku kepentingan."],["RESEARCH FORUM","Temuan ke percakapan publik","Membahas implikasi hasil riset terhadap kebijakan daerah."]],"#kolaborasi")}</div></section>
+    <section id="kegiatan" className="section dark"><div className="shell"><div className="title"><h2>Kegiatan & Banua Talks</h2><i/></div>{events.length?<div className="cards">{events.map(e=><a className="card reveal" href={`/kegiatan/${e.slug}`} key={e.id}><span>{e.category||'KEGIATAN'}</span><h3>{e.title}</h3><p>{e.excerpt|| (e.event_date?new Date(e.event_date).toLocaleDateString('id-ID'):'Kegiatan Banua Research')}</p><b>→</b></a>)}</div>:cards([["DISKUSI PUBLIK","Ruang diskusi berbasis riset","Menghubungkan peneliti, pemerintah, komunitas, dan media."],["FGD","Pendalaman persoalan daerah","Mempertemukan data, pengalaman, dan perspektif pemangku kepentingan."],["RESEARCH FORUM","Temuan ke percakapan publik","Membahas implikasi hasil riset terhadap kebijakan daerah."]],"/kegiatan")}<div style={{marginTop:28}}><a href="/kegiatan">Lihat semua kegiatan →</a></div></div></section>
 
     <section id="kolaborasi" className="section pale"><div className="shell"><div className="title"><h2>Kolaborasi</h2><i/></div>{cards([["RISET BERSAMA","Kolaborasi penelitian","Survey, kajian kebijakan, evaluasi, dan riset bersama."],["KNOWLEDGE PARTNERSHIP","Kemitraan pengetahuan","Pertukaran data, forum pengetahuan, dan publikasi bersama."],["POLICY SUPPORT","Dukungan kebijakan","Analisis dan rekomendasi berbasis bukti."]],"#kontak")}</div></section>
 
     <section id="kontak" className="closing"><div className="shell"><span className="eyebrow">▲ BANUA RESEARCH</span><h2>Pengetahuan lokal.<br/>Dampak kebijakan yang lebih luas.</h2><p>Berbasis di Palu, Sulawesi Tengah.</p><a href="mailto:halo@banuaresearch.id">Hubungi Banua Research</a></div></section>
 
-    <footer><div className="shell foot"><div><a href="#top" className="brand footbrand"><img src={logo} alt="Logo Banua Research"/></a><p>Research · Policy · Regional Insight</p></div><div><a href="/publikasi">Publikasi</a><a href="#riset">Riset</a><a href="#data">Data</a><a href="#kegiatan">Kegiatan</a></div><div><a href="#peneliti">Peneliti</a><a href="#kolaborasi">Kolaborasi</a><a href="#kontak">Kontak</a></div></div></footer>
+    <footer><div className="shell foot"><div><a href="#top" className="brand footbrand"><img src={logo} alt="Logo Banua Research"/></a><p>Research · Policy · Regional Insight</p></div><div><a href="/publikasi">Publikasi</a><a href="#riset">Riset</a><a href="#data">Data</a><a href="/kegiatan">Kegiatan</a></div><div><a href="#peneliti">Peneliti</a><a href="#kolaborasi">Kolaborasi</a><a href="#kontak">Kontak</a></div></div></footer>
   </main>
 }
