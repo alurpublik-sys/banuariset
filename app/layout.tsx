@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./fixes.css";
+import "./nav.css";
 
 export const metadata: Metadata = {
   title: "Banua Research — Research & Policy Knowledge Hub",
