@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import "./fixes.css";
-import "./nav.css";
 
 export const metadata: Metadata = {
   title: "Banua Research — Research & Policy Knowledge Hub",
@@ -9,9 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return (
-    <html lang="id">
-      <body>{children}</body>
-    </html>
-  );
+  return <html lang="id"><body>{children}</body></html>;
 }
