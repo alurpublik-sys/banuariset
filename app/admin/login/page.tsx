@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { saveAdminPin, supabase } from "../../../lib/supabase";
+import { supabase } from "../../../lib/supabase";
 import "../admin.css";
 
 export default function AdminLoginPage() {
@@ -17,10 +17,18 @@ export default function AdminLoginPage() {
     setError("");
 
     try {
-      const { data, error: rpcError } = await supabase.rpc("verify_admin_pin", { p_pin: pin });
-      if (rpcError) throw rpcError;
-      if (!data?.ok || !data?.user_id) throw new Error("PIN tidak sesuai.");
-      saveAdminPin(pin, data.user_id);
+      const { data, error: invokeError } = await supabase.functions.invoke("pin-login", {
+        body: { pin },
+      });
+      if (invokeError) throw invokeError;
+      if (!data?.token_hash) throw new Error("PIN tidak sesuai.");
+
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        token_hash: data.token_hash,
+        type: "email",
+      });
+      if (verifyError) throw verifyError;
+
       router.replace("/admin");
     } catch {
       setError("PIN salah. Silakan coba lagi.");
