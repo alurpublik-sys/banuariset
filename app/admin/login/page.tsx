@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../../../lib/supabase";
+import { saveAdminPin, supabase } from "../../../lib/supabase";
 import "../admin.css";
 
 export default function AdminLoginPage() {
@@ -17,18 +17,10 @@ export default function AdminLoginPage() {
     setError("");
 
     try {
-      const { data, error: invokeError } = await supabase.functions.invoke("pin-login", {
-        body: { pin },
-      });
-      if (invokeError) throw invokeError;
-      if (!data?.token_hash) throw new Error(data?.error || "PIN tidak sesuai.");
-
-      const { error: verifyError } = await supabase.auth.verifyOtp({
-        token_hash: data.token_hash,
-        type: "email",
-      });
-      if (verifyError) throw verifyError;
-
+      const { data, error: rpcError } = await supabase.rpc("verify_admin_pin", { p_pin: pin });
+      if (rpcError) throw rpcError;
+      if (!data?.ok || !data?.user_id) throw new Error("PIN tidak sesuai.");
+      saveAdminPin(pin, data.user_id);
       router.replace("/admin");
     } catch {
       setError("PIN salah. Silakan coba lagi.");
@@ -45,14 +37,14 @@ export default function AdminLoginPage() {
         </a>
         <span className="admin-kicker">BANUA RESEARCH CMS</span>
         <h1>Masuk Admin</h1>
-        <p>Masukkan PIN untuk membuka dashboard pengelolaan Banua Research.</p>
+        <p>Cukup masukkan PIN untuk membuka dashboard.</p>
         <form onSubmit={submit}>
           <label>PIN Admin
             <input
               className="admin-pin-input"
               type="password"
               inputMode="numeric"
-              autoComplete="one-time-code"
+              autoComplete="off"
               maxLength={6}
               value={pin}
               onChange={e=>setPin(e.target.value.replace(/\D/g,"").slice(0,6))}
